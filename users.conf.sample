@@ -1,0 +1,51 @@
+[nppx_user](!)
+dtmfmode=rfc2833
+canreinvite=no
+context=org1_phones
+host=dynamic
+trustrpid=yes
+sendrpid=no
+type=friend
+nat=no
+port=5060
+qualify=yes
+usereqphone=yes
+disallow = all
+allow = alaw,ulaw
+hasvoicemail = no
+hassip = yes
+hasiax = no
+hash323 = no
+hasmanager = no
+
+[105](nppx_user)
+secret=Test_000
+callerid=Андрей Тополев
+
+[509](nppx_user)
+secret=Test_001
+callerid=Aлександр Ревякин
+nat=force_rport,comedia
+
+
+;полюс-урала шаблон
+[polus_user](!)
+dtmfmode=rfc2833
+canreinvite=no
+context=org2_phones
+host=dynamic
+trustrpid=yes
+sendrpid=no
+type=friend
+nat=no
+port=5060
+qualify=yes
+usereqphone=yes
+disallow = all
+allow = alaw,ulaw
+hasvoicemail = no
+hassip = yes
+hasiax = no
+hash323 = no
+hasmanager = no
+

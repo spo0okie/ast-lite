@@ -1,0 +1,66 @@
+;файл настроек отдельного филиала организации
+;в нем хранятся настройки индивидуальные для конкретно этого сервера
+;если в организации телефония распределена на несколько серверов, то файл
+;шаблона организации у них одинаковый, а эти файлы разные
+
+
+;наименование организации (для префиксов файлов)
+org1_name=nppx
+
+;Внешний номер для звонков наружу
+org1_EXT_CallerID=3512100530
+
+;емэйл для отправки факсов
+org1_FAX_Mail=info@nppx.ru
+
+
+;Дистпетчер в голосовом меню организации
+[org1_IVR_disp]
+exten => s,1,Dial(Local/105@org1_internal,30,${DialOpts})
+exten => s,1,Dial(Local/102@org1_internal,20,${DialOpts})
+exten => s,n,Dial(Local/201@org1_internal,20,${DialOpts})
+exten => s,n,Dial(Local/103@org1_internal,20,${DialOpts})
+exten => s,n,Dial(Local/202@org1_internal,20,${DialOpts})
+
+
+;контекст персональных настроек для филиала
+[org1_private_local]
+;хинты для BLF на телефонах
+exten =>105,hint,SIP/105
+exten =>102,hint,SIP/102
+exten =>103,hint,SIP/103
+exten =>104,hint,SIP/104
+exten =>201,hint,SIP/201
+exten =>202,hint,SIP/202
+exten =>501,hint,SIP/501
+exten =>509,hint,SIP/509
+
+;Сервисные вызовы уникальные в филиале (на этом сервере)
+[org1_private_service]
+
+;конференция
+exten => 777,1,Meetme(555)
+
+;запись сообщений 491-499 - record; 481-489 - listen
+exten => _49X, 1, Playback(beep)
+exten => _49X, n, Playback(beep)
+exten => _49X, n, Record(/var/lib/asterisk/sounds/nppx/rec${EXTEN:2:1}.wav)
+exten => _49X, n, Wait(2)
+exten => _49X, n, Playback(/var/lib/asterisk/sounds/nppx/rec${EXTEN:2:1})
+exten => _49X, n, Hangup()
+
+exten => _48X, 1, Playback(/var/lib/asterisk/sounds/nppx/rec${EXTEN:2:1})
+exten => _48X, n, Hangup()
+
+
+;Контекст выхода наружу
+[org1_external]
+exten => _+7.,1,Dial(local/8${EXTEN:2}@${CONTEXT})
+
+exten => _[72]XXXXXX,1,Macro(Msg,Outgoing_call: ${CALLERID(num)} over ${org1_EXT_CallerID} -> ${EXTEN})
+exten => _[72]XXXXXX,n,Set(CALLERID(all)=${org1_EXT_CallerID})
+exten => _[72]XXXXXX,n,Dial(SIP/nppx_hypnet/${EXTEN},${DialTime},${DialOpts})
+
+exten => _8XXXXXXXXXX,1,Macro(Msg,Outgoing_call: ${CALLERID(num)} over ${org1_EXT_CallerID} -> ${EXTEN})
+exten => _8XXXXXXXXXX,n,Set(CALLERID(all)=${org1_EXT_CallerID})
+exten => _8XXXXXXXXXX,n,Dial(SIP/nppx_hypnet/${EXTEN},${DialTime},${DialOpts})

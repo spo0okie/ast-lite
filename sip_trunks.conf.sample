@@ -1,0 +1,20 @@
+[hypernet_trunk](!)
+dtmfmode=rfc2833
+canreinvite=no
+call-limit=10
+context=org1_incoming
+host=pbx.hypernet.ru
+insecure=invite,port
+trustrpid=yes
+sendrpid=no
+type=friend
+nat=rport,comedia
+port=5060
+qualify=yes
+disallow = all
+allow = g729,alaw,ulaw
+
+[nppx_hypnet](hypernet_trunk)
+secret=EfvephadGi
+username=3512100530
+
