@@ -19,8 +19,9 @@ hash323 = no
 hasmanager = no
 
 [105](nppx_user)
-secret=Test_000
+secret=T34ffd1
 callerid=Андрей Тополев
+nat=force_rport,comedia
 
 [509](nppx_user)
 secret=Test_001

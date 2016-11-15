@@ -56,6 +56,8 @@ exten => _48X, n, Hangup()
 ;Контекст выхода наружу
 [org1_external]
 exten => _+7.,1,Dial(local/8${EXTEN:2}@${CONTEXT})
+exten => _9XXXXXXXXX,1,Dial(local/8${EXTEN}@${CONTEXT})
+exten => _XXXXXXXXXX%,1,Dial(local/${EXTEN:1:10}@${CONTEXT})
 
 exten => _[72]XXXXXX,1,Macro(Msg,Outgoing_call: ${CALLERID(num)} over ${org1_EXT_CallerID} -> ${EXTEN})
 exten => _[72]XXXXXX,n,Set(CALLERID(all)=${org1_EXT_CallerID})
@@ -64,3 +66,10 @@ exten => _[72]XXXXXX,n,Dial(SIP/nppx_hypnet/${EXTEN},${DialTime},${DialOpts})
 exten => _8XXXXXXXXXX,1,Macro(Msg,Outgoing_call: ${CALLERID(num)} over ${org1_EXT_CallerID} -> ${EXTEN})
 exten => _8XXXXXXXXXX,n,Set(CALLERID(all)=${org1_EXT_CallerID})
 exten => _8XXXXXXXXXX,n,Dial(SIP/nppx_hypnet/${EXTEN},${DialTime},${DialOpts})
+
+
+;в этот контекст приходят входящие вызовы
+[org1_incoming]
+exten => _X.,1,Macro(Msg,Incoming_Call: ${CALLERID(num)} -> ${EXTEN}@${CONTEXT})
+exten => _X.,n,Set(CALLERID(num)=8${CALLERID(num)})
+exten => _X.,n,GoTo(org1_IVR,s,1)

@@ -1,3 +1,14 @@
+;В этом файле продолжается секция general файла sip.conf
+;
+;сначала нужно обьявить все регистрации у провайдеров
+
+register => 3512100530:EfvephadGi@pbx.hypernet.ru/3512100530
+;register => 3512100530@pbx.hypernet.ru:EfvephadGi@pbx.hypernet.ru ;/3512100530
+
+;потом нужно обьявить сами транки 
+;именование не принципиально, поскольку все ссылки на транки используются в приватном
+;файле ./exten.priv.org1.conf
+
 [hypernet_trunk](!)
 dtmfmode=rfc2833
 canreinvite=no
