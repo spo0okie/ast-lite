@@ -7,6 +7,8 @@
 ;наименование организации (для префиксов файлов)
 org1_name=nppx
 
+RecordCalls_Nppx=yes
+
 ;Внешний номер для звонков наружу
 org1_EXT_CallerID=3512100530
 
@@ -72,4 +74,5 @@ exten => _8XXXXXXXXXX,n,Dial(SIP/nppx_hypnet/${EXTEN},${DialTime},${DialOpts})
 [org1_incoming]
 exten => _X.,1,Macro(Msg,Incoming_Call: ${CALLERID(num)} -> ${EXTEN}@${CONTEXT})
 exten => _X.,n,Set(CALLERID(num)=8${CALLERID(num)})
+exten => _X.,n,Macro(RecordCall,IN-${CALLERID(num)},Nppx)
 exten => _X.,n,GoTo(org1_IVR,s,1)
