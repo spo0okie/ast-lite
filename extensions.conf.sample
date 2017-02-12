@@ -21,11 +21,12 @@ Logfile=/var/log/asterisk/ext_messages.log
 ;настроек надо будет делить отдельно на файл переменных (грузить первыми) и файл контекстов
 
 ;подгружаем персональный файл филиала
-#include "exten.macro.conf"
-
-;подгружаем персональный файл филиала
 #include "exten.priv.org1.conf"
 
 ;подгружаем файл организации
 #include "exten.tpl.org1.conf"
+
+;подгружаем библиотеку макросов
+#include "exten.tpl.macro.conf"
+
 
