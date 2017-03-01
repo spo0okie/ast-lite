@@ -1,7 +1,0 @@
-exten.priv.org1.conf
-exten.priv.org2.conf
-exten.priv.org3.conf
-extensions.conf
-restart.cisco.sh
-sip_trunks.conf
-users.conf
