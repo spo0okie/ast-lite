@@ -23,10 +23,13 @@ if [ "$2" == "all" ]; then
 	exit
 fi
 
-phone_addr=`asterisk -rx "sip show peer $2"|grep Addr- |cut -d: -f2|sed 's/ //g'`
-if [ -z "$phone_addr" ]; then
-	echo "Phone $2 not found on server"
-	exit 11
+
+iptest=`echo "$2" |grep -E '([0-9]{1,3}[\.]){3}[0-9]{1,3}'`
+if [ "$2" == "$iptest" ]; then
+	echo "got phone IP"
+	phone_addr=$2
+else
+	phone_addr=`asterisk -rx "sip show peer $2"|grep Addr- |cut -d: -f2|sed 's/ //g'`
 fi
 
 if [ -z "$3" ]; then
