@@ -1,7 +1,11 @@
 extensions.conf
 sip_trunks.conf
+sip_trunks_chl.conf
+sip_trunks_msk.conf
 users.conf
 exten.priv.org1.conf
 exten.priv.ivr.conf
+exten.priv.ivr_azimut.conf
+exten.priv.ivr_niiit.conf
 push.users
 *.bak
