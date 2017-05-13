@@ -5,3 +5,4 @@ exten.priv.*
 push.users
 push.config
 *.bak
+translit.sh
