@@ -3,6 +3,7 @@ users.conf
 sip_trunks*
 exten.priv.*
 push.users
-push.config
+cluster.conf
 *.bak
 translit.sh
+keys
