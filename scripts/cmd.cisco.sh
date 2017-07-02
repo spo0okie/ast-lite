@@ -41,7 +41,7 @@ if [ -z "$3" ]; then
 fi
 
 case $1 in
-	[Rr][Ee][Ll][Oo][Aa][Dd]|[Rr][Ee][Bb][Oo][Oo][Tt])
+	[Rr][Ee][Ll][Oo][Aa][Dd]|[Rr][Ee][Bb][Oo][Oo][Tt]|[Rr][Ee][Ss][Tt][Aa][Rr][Tt])
 		curl "http://$phone_addr/admin/reboot"
 		;;
 	[Gg][Ee][Tt][Xx][Mm][Ll])
