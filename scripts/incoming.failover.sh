@@ -21,22 +21,25 @@ icf_prov_trunk_desc="icf_prov_trunk misconfigured? must content name of provider
 #настройки этой ноды в кластере отказоустойчивых серверов астериск
 require /etc/asterisk/node.conf
 
-check_var "icf_conf" "Must content name of file with failover config"
+check_var "icf_conf_sip" "Must content name of file with failover SIP config"
+check_var "icf_conf_ext" "Must content name of file with failover dialplan config"
 check_var "icf_main_peer" "$icf_main_peer_desc"
 check_var "icf_prov_trunk" "$icf_prov_trunk_desc"
 
+config_line_sip="#include $icf_conf_sip"
+config_line_ext="#include $icf_conf_ext"
+
 #включает или выключает конфигурацию для резервирования (коментирует или раскомментирует инклуд файла с конфигурацией)
 set_config() {
-	config_line="#include $icf_conf"
 	log "set_config(): Switching failover mode to $1"
 	case "$1" in
 		on)
 			#включить резервирование - раскомментировать подключение конфига с регистрацией
-			sed_file $config "s/;$config_line/$config_line/"
+			sed_file $config_sip "s/;$config_line_sip/$config_line_sip/"
 			;;
 		off)
 			#выключить резервирование - закомментировать подключение конфига с регистрацией
-			sed_file $config "s/$config_line/;$config_line/"
+			sed_file $config_sip "s/$config_line_sip/;$config_line_sip/"
 			;;
 		*)
 			stop "set_config(): Incorrect request [$1]; must be <on|off>"
@@ -46,24 +49,29 @@ set_config() {
 
 #возвращает текущую настройку резервирования в конфиге (включен/выключен)
 get_config() {
-	config_on=`/bin/cat $config | /bin/grep -E "^#include $icf_conf" | wc -l`
-	config_off=`/bin/cat $config | /bin/grep -E "^;#include $icf_conf" | wc -l`
+	config_sip_on= `/bin/cat $config_sip | /bin/grep -E "^$config_line_sip" | wc -l`
+	config_sip_off=`/bin/cat $config_sip | /bin/grep -E "^;$config_line_sip"| wc -l`
+	config_ext_on= `/bin/cat $config_ext | /bin/grep -E "^$config_line_ext" | wc -l`
+	config_ext_off=`/bin/cat $config_ext | /bin/grep -E "^;$config_line_ext"| wc -l`
 
-	case "$config_on-$config_off" in
-		1-0)
-			echo "on"
+	case "$config_sip_on-$config_ext_on-$config_sip_off-$config_ext_off" in
+		1-1-0-0)
+			#включение присутствует в СИП и диалплане, выключение отсутствует и там и там
+			config_now="on"
 			;;
-		0-1)
-			echo "off"
+		0-0-1-1)
+			#включение отсутствует и в СИП и в диалплане, выключение отсутствует и там и там
+			config_now="off"
 			;;
 		*)
+			#чтото напутано. не можем работать
 			stop "config error"
 			;;
 	esac
 }
 
 #возвращает текущую необходимость во включении резервирования
-set_status() {
+get_status() {
 	main_peer_status=$(ast_peer_status $icf_main_peer)
 	prov_trunk_status=$(ast_peer_status $icf_prov_trunk)
 	check_var "main_peer_status" "$icf_main_peer_desc. Current value is [$icf_main_peer]"
@@ -75,8 +83,8 @@ set_status() {
 	fi
 }
 
-config_now=$(get_config)
-set_status
+get_config
+get_status
 
 if [ "$config_now" != "$status_now" ]; then
 	sleep 45
