@@ -2,8 +2,7 @@ extensions.conf
 users.conf
 sip_trunks*
 exten.priv.*
-push.users
 cluster.conf
+node.conf
 *.bak
-translit.sh
 keys
