@@ -12,7 +12,8 @@
 logfile=/var/log/asterisk/incoming.failover.log
 
 #конфиг в который будет инклудиться конфиг с настройками для резервинования
-config=/etc/asterisk/sip_trunks.conf
+config_sip=/etc/asterisk/sip_trunks.conf
+config_ext=/etc/asterisk/exten.priv.org1.conf
 
 #сокращение в переменных icf = incoming calls failover
 icf_main_peer_desc="icf_main_peer misconfigured? must content name of default peer for incoming calls acceptance."
@@ -36,10 +37,12 @@ set_config() {
 		on)
 			#включить резервирование - раскомментировать подключение конфига с регистрацией
 			sed_file $config_sip "s/;$config_line_sip/$config_line_sip/"
+			sed_file $config_ext "s/;$config_line_ext/$config_line_ext/"
 			;;
 		off)
 			#выключить резервирование - закомментировать подключение конфига с регистрацией
 			sed_file $config_sip "s/$config_line_sip/;$config_line_sip/"
+			sed_file $config_ext "s/$config_line_ext/;$config_line_ext/"
 			;;
 		*)
 			stop "set_config(): Incorrect request [$1]; must be <on|off>"
@@ -49,10 +52,10 @@ set_config() {
 
 #возвращает текущую настройку резервирования в конфиге (включен/выключен)
 get_config() {
-	config_sip_on= `/bin/cat $config_sip | /bin/grep -E "^$config_line_sip" | wc -l`
-	config_sip_off=`/bin/cat $config_sip | /bin/grep -E "^;$config_line_sip"| wc -l`
-	config_ext_on= `/bin/cat $config_ext | /bin/grep -E "^$config_line_ext" | wc -l`
-	config_ext_off=`/bin/cat $config_ext | /bin/grep -E "^;$config_line_ext"| wc -l`
+	config_sip_on=`/bin/cat $config_sip | /bin/grep -E "^$config_line_sip" | wc -l`
+	config_sip_off=`/bin/cat $config_sip | /bin/grep -E "^;$config_line_sip" | wc -l`
+	config_ext_on=`/bin/cat $config_ext | /bin/grep -E "^$config_line_ext" | wc -l`
+	config_ext_off=`/bin/cat $config_ext | /bin/grep -E "^;$config_line_ext" | wc -l`
 
 	case "$config_sip_on-$config_ext_on-$config_sip_off-$config_ext_off" in
 		1-1-0-0)
@@ -65,7 +68,7 @@ get_config() {
 			;;
 		*)
 			#чтото напутано. не можем работать
-			stop "config error"
+			stop "Config error: sip ena [$config_sip_on], ext ena [$config_ext_on], sip dis [$config_sip_off], ext dis [$config_ext_off]"
 			;;
 	esac
 }
@@ -93,7 +96,8 @@ if [ "$config_now" != "$status_now" ]; then
 	if [ "$config_now" != "$status_now" ]; then
 		log "Got misconfiguration: remote_peer is [$main_peer_status], prov_trunk is [$prov_trunk_status], failover must be [$status_now], failover cofig is [$config_now]"
 		set_config $status_now
-		#/usr/sbin/asterisk -rx "sip reload"
+		/usr/sbin/asterisk -rx "sip reload"
+		/usr/sbin/asterisk -rx "dialplan reload"
 	fi
 fi
 
