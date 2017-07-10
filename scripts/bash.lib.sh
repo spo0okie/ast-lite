@@ -47,6 +47,15 @@ ast_peer_status() {
 	echo $status
 }
 
+#общее количество настроенных регистраций
+ast_total_registry() {
+	total=`/usr/sbin/asterisk -rx "sip show registry" | grep "SIP registrations" | cut -d" " -f1`
+}
+
+#текущее количество успешных регистраций
+ast_online_registry() {
+	online=`/usr/sbin/asterisk -rx "sip show registry"|grep "Registered"|wc -l`
+}
 
 #прогоняет файл через сед и заменят старый файл результатом прогона
 sed_file(){

@@ -9,7 +9,8 @@
 . /etc/asterisk/scripts/bash.lib.sh
 
 #файл лога
-logfile=/var/log/asterisk/incoming.failover.log
+status=/var/log/asterisk/incoming.failover
+logfile=$status.log
 
 #конфиг в который будет инклудиться конфиг с настройками для резервинования
 config_sip=/etc/asterisk/sip_trunks.conf
@@ -30,6 +31,16 @@ check_var "icf_prov_trunk" "$icf_prov_trunk_desc"
 config_line_sip="#include $icf_conf_sip"
 config_line_ext="#include $icf_conf_ext"
 
+#выставляет флаг ошибки работы скрипта
+set_error() {
+	echo $1 > $status.err
+}
+
+#выставляет флаг включения режима резервирования
+set_flag() {
+	echo $1 > $status
+}
+
 #включает или выключает конфигурацию для резервирования (коментирует или раскомментирует инклуд файла с конфигурацией)
 set_config() {
 	log "set_config(): Switching failover mode to $1"
@@ -45,6 +56,7 @@ set_config() {
 			sed_file $config_ext "s/$config_line_ext/;$config_line_ext/"
 			;;
 		*)
+			set_error 1
 			stop "set_config(): Incorrect request [$1]; must be <on|off>"
 			;;
 	esac
@@ -68,6 +80,7 @@ get_config() {
 			;;
 		*)
 			#чтото напутано. не можем работать
+			set_error 1
 			stop "Config error: sip ena [$config_sip_on], ext ena [$config_ext_on], sip dis [$config_sip_off], ext dis [$config_ext_off]"
 			;;
 	esac
@@ -86,19 +99,32 @@ get_status() {
 	fi
 }
 
+
 get_config
 get_status
 
 if [ "$config_now" != "$status_now" ]; then
 	sleep 45
-	config_now=$(get_config)
-	set_status
+	get_config
+	get_status
 	if [ "$config_now" != "$status_now" ]; then
 		log "Got misconfiguration: remote_peer is [$main_peer_status], prov_trunk is [$prov_trunk_status], failover must be [$status_now], failover cofig is [$config_now]"
 		set_config $status_now
 		/usr/sbin/asterisk -rx "sip reload"
 		/usr/sbin/asterisk -rx "dialplan reload"
+		sleep 5
+		get_config
+		get_status
+		if [ "$config_now" != "$status_now" ]; then
+			set_error 1
+			stop "Got reconfiguration error: remote_peer is [$main_peer_status], prov_trunk is [$prov_trunk_status], failover must be [$status_now], failover cofig is [$config_now]"
+		fi
 	fi
 fi
 
-
+set_error 0
+if [ "$status_now" == "on" ]; then
+	set_flag 1
+else
+	set_flag 0
+fi
