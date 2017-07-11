@@ -4,6 +4,7 @@
 . /etc/asterisk/scripts/bash.lib.sh
 
 #файл лога
+statusfile=/var/log/asterisk/ext_ip
 logfile=/var/log/asterisk/ext_ip.log
 
 config=/etc/asterisk/sip_trunks.conf
@@ -17,10 +18,12 @@ config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externaddr= | /
 
 
 if [ -z "$natted_ext" ]; then
+	set_error_flag 1
 	stop "ERROR: Can't detect natted address"
 fi
 
 if [ -z "$config_ext" ]; then
+	set_error_flag 1
 	stop "ERROR: Can't detect configured address"
 fi
 
@@ -40,3 +43,4 @@ else
 	echo "Current configured: $config_ext;	natted: $natted_ext;	- All OK"
 fi
 
+set_error_flag 0
