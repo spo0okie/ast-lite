@@ -59,8 +59,14 @@ ast_online_registry() {
 
 #прогоняет файл через сед и заменят старый файл результатом прогона
 sed_file(){
-	cp $1 $1.bak
-	/bin/cat $1.bak | /bin/sed "$2" > $1
+	if [ ! -f "$1" ]; then
+		stop "ERR: Can't sed $1: file not found"
+	fi
+	if cp $1 $1.bak; then
+		/bin/cat $1.bak | /bin/sed "$2" > $1
+	else
+		stop "ERR: Can't sed $1: copying error"
+	fi
 }
 
 #инклудит обязательный файл
