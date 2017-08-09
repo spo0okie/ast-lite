@@ -69,6 +69,16 @@ sed_file(){
 	fi
 }
 
+#прогоняет файл через сед и заменят старый файл результатом прогона
+backup_file(){
+	if [ ! -f "$1" ]; then
+		stop "ERR: Can't backup $1: file not found"
+	fi
+	if ! cp -fT $1 $1.bak; then
+		stop "ERR: Can't backup $1: copying error"
+	fi
+}
+
 #инклудит обязательный файл
 require() {
 	if [ -z "$1" ]; then
