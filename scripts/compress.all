@@ -1,0 +1,16 @@
+#!/bin/sh
+usage="Usage: $0 <folder>"
+if [ -z "$1" ]; then
+	echo $usage
+	exit 1
+fi
+
+if [ -d "$1" ]; then
+	for f in $1/*-in.wav; do
+		./endrec.sh ${f%-in.wav}
+		#exit 0
+	done
+else
+	echo "$1 not found or not a directory"
+	exit 2
+fi

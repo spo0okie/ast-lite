@@ -1,4 +1,5 @@
 extensions.conf
+dongle.conf
 users.conf
 sip_trunks*
 exten.priv.*
