@@ -1,6 +1,0 @@
-#!/bin/sh
-log=/var/log/asterisk/messages
-hashes=`tail -4000 $log | egrep "WARNING\[7524\] chan_sip.c: Timeout on .+ on non-critical invite transaction\." | cut -d' ' -f8`
-for hash in $hashes; do
-	echo hash: $hash
-done
