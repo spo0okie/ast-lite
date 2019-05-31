@@ -13,7 +13,7 @@ config=/etc/asterisk/sip_trunks.conf
 natted_ext=`/usr/bin/wget -O - -q icanhazip.com|/bin/sed 's/ //g'`
 
 #сконфигурированный адрес
-config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externaddr= | /bin/cut -d"=" -f2 |/bin/sed 's/ //g'`
+config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | /bin/cut -d"=" -f2 |/bin/sed 's/ //g'`
 
 
 
@@ -32,7 +32,7 @@ if [ "$natted_ext" != "$config_ext" ]; then
 	#если адреса разъехались
 	log "Current configured IP: $config_ext != natted: $natted_ext;	- Reconfig now"
 	#делаем из старого конфиге новый, в котором подменяем внешний адрес на обнаруженный
-	/bin/cat $config | /bin/sed "s/externaddr=$config_ext/externaddr=$natted_ext/" > $config.new__
+	/bin/cat $config | /bin/sed "s/externip=$config_ext/externip=$natted_ext/" > $config.new__
 	#подменяем сам конфиг
 	mv $config.new__ $config
 	#перепускаем сервис

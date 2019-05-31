@@ -32,3 +32,6 @@ node.conf
 keys
 #очереди у каждого свои
 queues.conf
+#папки организаций
+org*
+exten.tpl.org*
