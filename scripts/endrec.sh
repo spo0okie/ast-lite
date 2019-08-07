@@ -15,7 +15,7 @@ mp3file=$1.mp3
 
 volcoeff="8"
 rate="24k"
-sox="/usr/local/bin/sox"
+sox="nice /usr/local/bin/sox" # run a sox with reduced scheduling priority (nice)
 
 if [ -r $inrec ]; then
 	echo "$starttime: found IN channel wav: $inrec" >>$reclog
@@ -39,7 +39,7 @@ $sox -m $inrec $outrec -r $rate $mp3file vol $volcoeff >/dev/null 2>&1
 if [ -r $mp3file ]; then
 	echo "$starttime found mp3: $mp3file" >>$reclog
 	mp3dir=$recdir/$fdate
-	mkdir $mp3dir
+	mkdir -p $mp3dir # no error if existing (-p)
 	if [ -d $mp3dir ]; then
 		echo "$starttime moving mp3: $mp3dir" >>$reclog
 		mv $mp3file $mp3dir
