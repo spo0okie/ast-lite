@@ -41,6 +41,7 @@ var_ck 'server'
 	if $( bool "$push_sound" ); then
 		#толкаем кастомные звуковые файлы на все удаленные сервера
 		lmsg Pushing sound files to $server
+			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/org1 root@$server:/var/lib/asterisk/sounds
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/ru/org1 root@$server:/var/lib/asterisk/sounds/ru
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/en/org1 root@$server:/var/lib/asterisk/sounds/en
 	fi

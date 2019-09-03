@@ -1,11 +1,18 @@
 #!/bin/sh
+#скрипт окончания записи вызова
+#v2.0
+#	разделен отдельно на сжатие и раскладываение по папкам, для того
+#	чтобы можно было использовать сжатие отдельно
+/etc/asterisk/scripts/endrec_compress.sh $* && /etc/asterisk/scripts/endrec_store.sh $*
 
+exit
+#далее идет старый код, который разделен и улучшен парой скриптов выше
 
 starttime=`date`
 recdir=${1%/*}/..
 reclog=$recdir/record.log
 
-echo "$starttime: Got command $1" >> $reclog
+echo "$starttime: Got endrec $*" >> $reclog
 
 fdate=`echo $1|rev|cut -d/ -f1|rev|cut -d- -f1`
 
