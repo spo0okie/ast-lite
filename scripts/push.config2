@@ -12,7 +12,7 @@ lmsg "Config push started."
 
 conf=1
 while [ -e /etc/asterisk/org$conf/sip_users.conf ]; do
-	users_vonf_ck /etc/asterisk/org$conf/sip_users.conf
+	users_conf_ck /etc/asterisk/org$conf/sip_users.conf
 	conf=$(( $conf + 1 ))
 done
 
@@ -23,16 +23,6 @@ users_conf_ck $users_conf
 #делаем список хинтов
 cat $users_conf | grep -v '^;' | egrep '^\[[[:digit:]]{3,4}\]' | cut -d'(' -f1 | tr -d '[]' | awk '{print "exten => " $1 ",hint,SIP/" $1}' > exten.priv.hint.conf
 
-
-#подключаем конфиг
-INI='/etc/asterisk/cluster.ini'
-#проверяем наличие секции global в файле
-ini_section_ck $INI 'global'
-ini_section_load $INI 'global'
-
-#проверяем выставлены ли обязательные переменные в конфиге
-var_ck 'keyfile' 
-var_ck 'filesync_list'
 
 #типоавые комманды перезагрузки конфигурации на серверах
 command1="sip reload"
@@ -54,6 +44,18 @@ if $( asterisk -rx "core ping taskprocessor pbx-core" > /dev/nul 2>&1 ); then
 else
 	lmsg__err "$stage"
 fi
+
+#переходим к кластеру
+
+#подключаем конфиг
+INI='/etc/asterisk/cluster.ini'
+#проверяем наличие секции global в файле
+ini_section_ck $INI 'global'
+ini_section_load $INI 'global'
+
+#проверяем выставлены ли обязательные переменные в конфиге
+var_ck 'keyfile' 
+var_ck 'filesync_list'
 
 #грузим все секции
 sections=`ini_section_list $INI`
