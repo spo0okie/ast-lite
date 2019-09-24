@@ -1,0 +1,85 @@
+#!/bin/sh
+#подключаем общую библиотеку
+PROGPATH=`echo $0 | sed -e 's,[\\/][^\\/][^\\/]*$,,'`
+
+. $PROGPATH/lib/lib_core.sh
+lib_require lib_ini_files
+logfile=/var/log/asterisk/cluster/push.$1.log
+
+lmsg "Config push started."
+
+
+#подключаем конфиг
+ini_section_load '/etc/asterisk/cluster.ini' global
+
+#проверяем выставлены ли обязательные переменные в конфиге
+var_ck 'keyfile'
+var_ck 'filesync_list'
+
+command1="sip reload"
+command2="dialplan reload"
+command3="module reload"
+
+
+
+ini_section_load '/etc/asterisk/cluster.ini' $1
+var_ck 'server'
+
+	sendfiles=""
+	for item in $filesync_list; do
+		sendfiles="/etc/asterisk/$item $sendfiles"
+	done
+
+	for item in $additional_list; do
+		sendfiles="/etc/asterisk/$item $sendfiles"
+	done
+
+	#толкаем на удаленный сервер файлы по списку из конфига (уникально для каждого кластера)
+	lmsg Pushing config to $server
+		rsync -r -e "ssh -i $keyfile" $sendfiles root@$server:/etc/asterisk
+
+	if $( bool "$push_sound" ); then
+		#толкаем кастомные звуковые файлы на все удаленные сервера
+		lmsg Pushing sound files to $server
+			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/org1 root@$server:/var/lib/asterisk/sounds
+			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/ru/org1 root@$server:/var/lib/asterisk/sounds/ru
+			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/en/org1 root@$server:/var/lib/asterisk/sounds/en
+	fi
+
+	if $( bool "$push_phoneprov" ); then
+		#толкаем кастомные звуковые файлы на все удаленные сервера
+		lmsg Pushing provisioning files to $server
+			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/phoneprov root@$server:/var/lib/asterisk
+	fi
+
+	#перезагружаем конфигурацию удаленного сервера
+	lmsg Reloading $server''s asterisk config
+		ssh -i $keyfile root@$server \
+			"/usr/sbin/asterisk -rx '$command1';"\
+			"/usr/sbin/asterisk -rx '$command2';"\
+			"/usr/sbin/asterisk -rx '$command3'" >/dev/null
+
+	if $( bool "$push_db" ); then
+		if $( asterisk -rx "core ping taskprocessor pbx-core" > /dev/nul 2>&1 ); then
+			#пушим нашу БД на удаленный сервер: удаляем деревья настроек
+			lmsg DB Sync: Remove entire subtrees on remote server...
+				ssh -i $keyfile root@$server \
+				'/usr/sbin/asterisk -rx "database deltree CallerID";'\
+				'/usr/sbin/asterisk -rx "database deltree CallLimit";'\
+				'/usr/sbin/asterisk -rx "database deltree Dubler";'\
+				'/usr/sbin/asterisk -rx "database deltree DubDelay"' >/dev/null
+
+			#пушим нашу БД на удаленный сервер: пушим наши деревья на удаленный сервер
+			lmsg DB Sync: Pushing current data trees to remote server ...
+				(/usr/sbin/asterisk -rx "database show CallerID";
+				 /usr/sbin/asterisk -rx "database show CallLimit";
+				 /usr/sbin/asterisk -rx "database show Dubler";
+		 		/usr/sbin/asterisk -rx "database show DubDelay")|
+				ssh -i $keyfile root@$server \
+				"perl -e 'while(<STDIN>){"\
+				"system(\"/usr/sbin/asterisk\", \"-rx\", \"database put \$1 \$2 \$3\")"\
+				"if \$_ =~ m|[/]([^\s]+)[/]([^\s/]+)\s+:\s*(.+)|;}'" >/dev/null
+		else
+			lmsg Local Asterisk DB unavail
+		fi
+	fi

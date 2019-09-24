@@ -1,0 +1,87 @@
+#!/bin/sh
+#подключаем общую библиотеку
+PROGPATH=/etc/asterisk/scripts
+
+. $PROGPATH/lib/lib_core.sh
+lib_require lib_ini_files
+lib_require lib_aster
+lib_require lib_process
+
+lmsg "Config push started."
+
+
+conf=1
+while [ -e /etc/asterisk/org$conf/sip_users.conf ]; do
+	users_vonf_ck /etc/asterisk/org$conf/sip_users.conf
+	conf=$(( $conf + 1 ))
+done
+
+users_conf=/etc/asterisk/users.conf
+
+users_conf_ck $users_conf
+
+#делаем список хинтов
+cat $users_conf | grep -v '^;' | egrep '^\[[[:digit:]]{3,4}\]' | cut -d'(' -f1 | tr -d '[]' | awk '{print "exten => " $1 ",hint,SIP/" $1}' > exten.priv.hint.conf
+
+
+#подключаем конфиг
+INI='/etc/asterisk/cluster.ini'
+#проверяем наличие секции global в файле
+ini_section_ck $INI 'global'
+ini_section_load $INI 'global'
+
+#проверяем выставлены ли обязательные переменные в конфиге
+var_ck 'keyfile' 
+var_ck 'filesync_list'
+
+#типоавые комманды перезагрузки конфигурации на серверах
+command1="sip reload"
+command2="dialplan reload"
+command3="module reload"
+
+stage="checking asterisk alive ..."
+lmsg__ "$stage" err
+
+#перегружаем конфигурацию локального сервера (если он включен)
+if $( asterisk -rx "core ping taskprocessor pbx-core" > /dev/nul 2>&1 ); then
+	lmsg__ok "$stage"
+	#перегружаем конфигурацию локального сервера
+	lmsg "Applying local configs"
+	/usr/sbin/asterisk -rx "$command1">/dev/null
+	/usr/sbin/asterisk -rx "$command2">/dev/null
+	/usr/sbin/asterisk -rx "$command3">/dev/null
+	lmsg done
+else
+	lmsg__err "$stage"
+fi
+
+#грузим все секции
+sections=`ini_section_list $INI`
+#выкидываем секцию global
+sections=`arr_sub "$sections" global`
+
+
+#запускаем под каждую секуцию пуш отдельным процессом
+for section in $sections; do
+	$PROGPATH/func.push.config2 $section > /dev/nul & lastpid=$!
+	lmsg "Got new process pid: $lastpid ($section)"
+	eval piddescr_$lastpid="$section"
+
+	#запоминаем PID этой синхронизации
+	proclist="$proclist $lastpid"
+done
+
+#пока есть еще фоновые процессы
+while [ -n "$proclist" ]; do
+	#ждем пока ктонибудь завершится
+	waitManyPids "$proclist"
+
+	#корректируем список фоновых процессов
+	proclist=$pids_remain
+done
+
+
+
+
+lmsg "push done."
+

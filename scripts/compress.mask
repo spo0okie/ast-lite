@@ -1,0 +1,13 @@
+#!/bin/sh
+
+PWD=$(dirname $0)
+DIR="/home/record/org1/_current"
+
+if [ -z "$1" ]; then
+	echo "Usage: $0 <mask>"
+	exit 1
+fi
+
+for f in ${DIR}/${1}*-in.wav; do
+	${PWD}/endrec.sh ${f%-in.wav} &
+done
