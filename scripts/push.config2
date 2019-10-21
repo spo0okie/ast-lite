@@ -57,30 +57,42 @@ ini_section_load $INI 'global'
 var_ck 'keyfile' 
 var_ck 'filesync_list'
 
-#грузим все секции
-sections=`ini_section_list $INI`
+if [ -z $1 ]; then
+	#грузим все секции
+	sections=`ini_section_list $INI`
+else
+	sections=$1
+fi
+
 #выкидываем секцию global
 sections=`arr_sub "$sections" global`
 
+sections_count=`echo "$sections"|wc -w`
 
-#запускаем под каждую секуцию пуш отдельным процессом
-for section in $sections; do
-	$PROGPATH/func.push.config2 $section > /dev/nul & lastpid=$!
-	lmsg "Got new process pid: $lastpid ($section)"
-	eval piddescr_$lastpid="$section"
+if [ "$sections_count" -eq "1" ]; then
+	#у нас одна секция. выводим ее на переднем плане
+	$PROGPATH/func.push.config2 $sections
+else
+	#у нас несколько секций
+	#запускаем под каждую секуцию пуш отдельным процессом
+	for section in $sections; do
+		$PROGPATH/func.push.config2 $section > /dev/nul & lastpid=$!
+		lmsg "Got new process pid: $lastpid ($section)"
+		eval piddescr_$lastpid="$section"
 
-	#запоминаем PID этой синхронизации
-	proclist="$proclist $lastpid"
-done
+		#запоминаем PID этой синхронизации
+		proclist="$proclist $lastpid"
+	done
 
-#пока есть еще фоновые процессы
-while [ -n "$proclist" ]; do
-	#ждем пока ктонибудь завершится
-	waitManyPids "$proclist"
+	#пока есть еще фоновые процессы
+	while [ -n "$proclist" ]; do
+		#ждем пока ктонибудь завершится
+		waitManyPids "$proclist"
 
-	#корректируем список фоновых процессов
-	proclist=$pids_remain
-done
+		#корректируем список фоновых процессов
+		proclist=$pids_remain
+	done
+fi
 
 
 

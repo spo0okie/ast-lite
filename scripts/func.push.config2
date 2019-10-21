@@ -35,12 +35,12 @@ var_ck 'server'
 	done
 
 	#толкаем на удаленный сервер файлы по списку из конфига (уникально для каждого кластера)
-	lmsg Pushing config to $server
+	lmsg "Pushing config to $server"
 		rsync -r -e "ssh -i $keyfile" $sendfiles root@$server:/etc/asterisk
 
 	if $( bool "$push_sound" ); then
 		#толкаем кастомные звуковые файлы на все удаленные сервера
-		lmsg Pushing sound files to $server
+		lmsg "Pushing sound files to $server"
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/org1 root@$server:/var/lib/asterisk/sounds
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/ru/org1 root@$server:/var/lib/asterisk/sounds/ru
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/sounds/en/org1 root@$server:/var/lib/asterisk/sounds/en
@@ -48,7 +48,7 @@ var_ck 'server'
 
 	if $( bool "$push_phoneprov" ); then
 		#толкаем кастомные звуковые файлы на все удаленные сервера
-		lmsg Pushing provisioning files to $server
+		lmsg "Pushing provisioning files to $server"
 			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/phoneprov root@$server:/var/lib/asterisk
 	fi
 
@@ -62,7 +62,7 @@ var_ck 'server'
 	if $( bool "$push_db" ); then
 		if $( asterisk -rx "core ping taskprocessor pbx-core" > /dev/nul 2>&1 ); then
 			#пушим нашу БД на удаленный сервер: удаляем деревья настроек
-			lmsg DB Sync: Remove entire subtrees on remote server...
+			lmsg "DB Sync: Remove entire subtrees on remote server..."
 				ssh -i $keyfile root@$server \
 				'/usr/sbin/asterisk -rx "database deltree CallerID";'\
 				'/usr/sbin/asterisk -rx "database deltree CallLimit";'\
@@ -70,7 +70,7 @@ var_ck 'server'
 				'/usr/sbin/asterisk -rx "database deltree DubDelay"' >/dev/null
 
 			#пушим нашу БД на удаленный сервер: пушим наши деревья на удаленный сервер
-			lmsg DB Sync: Pushing current data trees to remote server ...
+			lmsg "DB Sync: Pushing current data trees to remote server ..."
 				(/usr/sbin/asterisk -rx "database show CallerID";
 				 /usr/sbin/asterisk -rx "database show CallLimit";
 				 /usr/sbin/asterisk -rx "database show Dubler";
@@ -80,6 +80,6 @@ var_ck 'server'
 				"system(\"/usr/sbin/asterisk\", \"-rx\", \"database put \$1 \$2 \$3\")"\
 				"if \$_ =~ m|[/]([^\s]+)[/]([^\s/]+)\s+:\s*(.+)|;}'" >/dev/null
 		else
-			lmsg Local Asterisk DB unavail
+			lmsg "Local Asterisk DB unavail"
 		fi
 	fi
