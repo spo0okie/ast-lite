@@ -36,6 +36,7 @@ var_ck 'server'
 
 	#толкаем на удаленный сервер файлы по списку из конфига (уникально для каждого кластера)
 	lmsg "Pushing config to $server"
+		#lmsg "$sendfiles"
 		rsync -r -e "ssh -i $keyfile" $sendfiles root@$server:/etc/asterisk
 
 	if $( bool "$push_sound" ); then
@@ -49,7 +50,7 @@ var_ck 'server'
 	if $( bool "$push_phoneprov" ); then
 		#толкаем кастомные звуковые файлы на все удаленные сервера
 		lmsg "Pushing provisioning files to $server"
-			rsync -r -e "ssh -i $keyfile" /var/lib/asterisk/phoneprov root@$server:/var/lib/asterisk
+			rsync -r --exclude '.git/' -e "ssh -i $keyfile" /var/lib/asterisk/phoneprov root@$server:/var/lib/asterisk
 	fi
 
 	#перезагружаем конфигурацию удаленного сервера
