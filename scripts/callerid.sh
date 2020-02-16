@@ -1,5 +1,5 @@
 #!/bin/bash
-wget http://$2?num=$1 -O - -q | grep -v ERR | xargs | head -c 30 | iconv -c
+wget --timeout=1 --tries=1 http://$2?num=$1 -O - -q | grep -v ERR | xargs | head -c 30 | iconv -c
 #запрашиваем каллерид
 #отсекаем ошибки
 #xargs делает чтото вроде трим

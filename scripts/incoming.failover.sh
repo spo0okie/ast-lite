@@ -101,6 +101,15 @@ get_status() {
 	fi
 }
 
+running=`ps ax| grep /usr/sbin/asterisk | grep -v grep |wc -l`
+
+if [ "$running" == "0" ]; then
+	log "no asterisk running"
+	set_error 0
+	set_flag 0
+	exit
+fi
+
 
 get_config
 get_status
