@@ -1,0 +1,20 @@
+;внешний адрес основного сервера
+setvar=>SERVER_EXT=8.9.10.11
+
+;резервный сервер на случай отвала основного
+setvar=>BACKUP_SERVER=192.168.0.3
+
+;внешний адрес резервного сервера
+setvar=>BACKUP_SERVER_EXT=8.9.10.12
+
+;влан для переключения CISCO
+setvar=>VOICE_VLAN=1
+
+;ссылка на адресную книгу
+setvar=>ADDRBOOK_NAME=Addr
+setvar=>ADDRBOOK_URL=http://inventory.domain.local/addrbook.php
+
+;смена пароля по умолчанию на админку на телефонах
+;используется только в профиле для grabdstream gxp16xx
+;но также нужно для скрипта перезагрузки грандстримов (в т.ч.750)
+setvar=>WEBADMINPWD=admin

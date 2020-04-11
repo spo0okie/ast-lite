@@ -1,0 +1,21 @@
+[general]
+autofill=yes             ; распределять всех ожидающих абонентов, по доступным операторам
+shared_lastcall=yes      ; дать паузу оператору,который залогинен в нескольких очередях,.
+                         ; после последнего вызова например закрытия заявки в теркере.
+
+[StandardQueue](!)       ; Шаблон для создания очередей
+musicclass=default       ; устанавливаем музыку во время ожидания
+strategy=rrmemory        ; Стратегия распределения звонков между операторами.
+                         ; напр(Round Robin Memory)
+joinempty=no             ; не включать абонентов в очередь если в ней не.
+                         ; зарегистрировано ни одного оператора.
+leavewhenempty=yes       ; покинуть очередь если нет доступных операторов
+ringinuse=no             ; не звенеть оператору если статус InUse..
+                         ; Оператор не может распылятся на 100500 абонентов.
+announce-position=yes
+announce-frequency=45
+
+[queue1](StandardQueue) ; создаем очередь на основе шаблона
+timeout = 25
+member => Local/101@org1_phones,0,queue1,SIP/org1_101
+member => Local/102@org1_phones,0,queue1,SIP/org1_102

@@ -1,0 +1,48 @@
+[org1_user](!)
+dtmfmode=rfc2833
+canreinvite=no
+context=org1_phones
+host=dynamic
+trustrpid=yes
+sendrpid=yes
+type=friend
+nat=no
+port=5060
+qualify=yes
+usereqphone=yes
+disallow = all
+allow = alaw,ulaw,g729
+hasvoicemail = no
+hassip = yes
+hasiax = no
+hash323 = no
+hasmanager = no
+autoprov=yes
+
+[org1_ext_user](!)
+dtmfmode=rfc2833
+canreinvite=no
+context=org1_phones
+host=dynamic
+trustrpid=yes
+sendrpid=yes
+type=friend
+nat=force_rport,comedia
+port=5060
+qualify=60000
+usereqphone=yes
+disallow = all
+allow = g729:80
+hasvoicemail = no
+hassip = yes
+hasiax = no
+hash323 = no
+hasmanager = no
+jbenable=yes
+jitterbuffer=300
+autoprov=yes
+profile=spa303-satelite
+
+[101](org1_user)
+secret=h37A1OeMzq
+callerid=Приемная <101>

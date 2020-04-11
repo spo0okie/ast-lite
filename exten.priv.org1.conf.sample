@@ -1,0 +1,39 @@
+;файл настроек отдельного филиала организации
+;в нем хранятся настройки индивидуальные для конкретно этого сервера
+;если в организации телефония распределена на несколько серверов, то файл
+;шаблона организации у них одинаковый, а эти файлы разные
+
+
+;контекст персональных настроек для филиала
+[org1_private_local]
+;контекст "локальная нумерация"
+;хинты для BLF на телефонах
+
+
+;Сервисные вызовы уникальные в филиале (на этом сервере)
+[org1_private_service]
+;конференция
+;exten => 555X,1,Meetme(55X)
+
+;запись сообщений 5991-5999 - record; 5981-5989 - listen
+exten => _999X, 1, Macro(recordMessage,org1, rec${EXTEN:3:1})
+exten => _998X, 1, Macro(playMessage,  org1, rec${EXTEN:3:1})
+
+
+;Контекст выхода наружу
+[org1_external]
+exten => _+7.,1,Dial(local/8${EXTEN:2}@${CONTEXT})
+exten => _9XXXXXXXXX,1,Dial(local/8${EXTEN}@${CONTEXT})
+
+exten => _[7,2]XXXXXX,1,Macro(DialOut-Simple,${CONTEXT:0:5},7351${EXTEN},domru_trunk1)
+exten => _7XXXXXXXXXX,1,Macro(DialOut-Simple,${CONTEXT:0:5},${EXTEN},domru_trunk1)
+exten => _8XXXXXXXXXX,1,Macro(DialOut-Simple,${CONTEXT:0:5},7${EXTEN:1},domru_trunk1)
+
+
+;в этот контекст приходят входящие вызовы
+[org1_incoming]
+exten => 73511234567,1,Macro(Msg,Incoming_Call: ${CALLERID(num)} -> ${EXTEN}@${CONTEXT})
+	same => n,Macro(RecordCall,IN-${EXTEN},org1)
+	same => n,Playback(org1/quarantine)
+	same => n,Dial(Local/101@org1_phones,${DialTime},${DialOpts})
+
