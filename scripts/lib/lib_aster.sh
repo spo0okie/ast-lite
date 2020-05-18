@@ -58,10 +58,14 @@ users_conf_ck(){
 	sections=`cat $users_conf | grep -v '^;' | egrep '^\[\w+\]' | egrep -v '^\[\w+\]\(!\)' | sed -E 's/\[(\w+)\](\(.*\))?/\1/'`
 	for sec in $sections; do
 		secret=null
+		username=null
 		ini_parser "$users_conf.bak" $sec
 		if [ "$secret" = "null" ] ; then
 			lmsg "$sec($callerid) - no passwd key exist! (adding)"
 			sed -i "/\[$sec\]/a\secret=" $users_conf
+		elif [ "$username" = "null" ] ; then
+			lmsg "$sec($callerid) - no username key exist! (adding)"
+			sed -i "/\[$sec\]/a\username=$sec" $users_conf
 		else
 			echo -n .
 		fi
