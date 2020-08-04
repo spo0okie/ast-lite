@@ -22,11 +22,18 @@ if [ -z "$natted_ext" ]; then
 	stop "ERROR: Can't detect natted address"
 fi
 
+#проверка синтаксиса возвращенного адреса
+if ! ( echo $natted_ext | grep '^\([0-9]\{1,3\}\.\?\)\{4\}$' ); then
+	set_error_flag 1
+	stop "ERROR: Can't detect natted address"
+fi
+
 if [ -z "$config_ext" ]; then
 	set_error_flag 1
 	stop "ERROR: Can't detect configured address"
 fi
 
+exit
 
 if [ "$natted_ext" != "$config_ext" ]; then
 	#если адреса разъехались
