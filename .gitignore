@@ -13,9 +13,11 @@ dongle.conf
 #
 #но не шаблоны транков, их мжно использовать везде
 !sip_trunks_tpl.conf
+!sip_trunks.conf.sample
 #
 #персональные диалпланы на то и персональные чтобы быть уникальными
 exten.priv.*
+!exten.priv.org1.conf.sample
 #
 #персональный файл провижнинга (переменные хоста)
 phoneprov.priv.conf
@@ -35,6 +37,7 @@ queues.conf
 #папки организаций
 org*
 exten.tpl.org*
+!exten.tpl.org1.conf
 
 #файлы настройки почты уникальны
 muttrc*

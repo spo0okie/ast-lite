@@ -8,6 +8,7 @@ logfile=/var/log/asterisk/cluster/push.$1.log
 
 lmsg "Config push started."
 
+dbtrees="CallerID CallLimit Dubler DubSched DubDelay"
 
 #подключаем конфиг
 ini_section_load '/etc/asterisk/cluster.ini' global
@@ -19,7 +20,6 @@ var_ck 'filesync_list'
 command1="sip reload"
 command2="dialplan reload"
 command3="module reload"
-
 
 
 ini_section_load '/etc/asterisk/cluster.ini' $1
@@ -64,18 +64,15 @@ var_ck 'server'
 		if $( asterisk -rx "core ping taskprocessor pbx-core" > /dev/nul 2>&1 ); then
 			#пушим нашу БД на удаленный сервер: удаляем деревья настроек
 			lmsg "DB Sync: Remove entire subtrees on remote server..."
-				ssh -i $keyfile root@$server \
-				'/usr/sbin/asterisk -rx "database deltree CallerID";'\
-				'/usr/sbin/asterisk -rx "database deltree CallLimit";'\
-				'/usr/sbin/asterisk -rx "database deltree Dubler";'\
-				'/usr/sbin/asterisk -rx "database deltree DubDelay"' >/dev/null
+				ssh -i $keyfile root@$server "for tree in $dbtrees; do /usr/sbin/asterisk -rx \"database deltree \$tree\"; done" #>/dev/null
+				#'/usr/sbin/asterisk -rx "database deltree CallerID";'\
+				#'/usr/sbin/asterisk -rx "database deltree CallLimit";'\
+				#'/usr/sbin/asterisk -rx "database deltree Dubler";'\
+				#'/usr/sbin/asterisk -rx "database deltree DubDelay"' >/dev/null
 
 			#пушим нашу БД на удаленный сервер: пушим наши деревья на удаленный сервер
 			lmsg "DB Sync: Pushing current data trees to remote server ..."
-				(/usr/sbin/asterisk -rx "database show CallerID";
-				 /usr/sbin/asterisk -rx "database show CallLimit";
-				 /usr/sbin/asterisk -rx "database show Dubler";
-		 		/usr/sbin/asterisk -rx "database show DubDelay")|
+				(for tree in $dbtrees; do /usr/sbin/asterisk -rx "database show $tree"; done)|
 				ssh -i $keyfile root@$server \
 				"perl -e 'while(<STDIN>){"\
 				"system(\"/usr/sbin/asterisk\", \"-rx\", \"database put \$1 \$2 \$3\")"\
