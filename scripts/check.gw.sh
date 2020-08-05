@@ -33,8 +33,6 @@ if [ -z "$config_ext" ]; then
 	stop "ERROR: Can't detect configured address"
 fi
 
-exit
-
 if [ "$natted_ext" != "$config_ext" ]; then
 	#если адреса разъехались
 	log "Current configured IP: $config_ext != natted: $natted_ext;	- Reconfig now"
