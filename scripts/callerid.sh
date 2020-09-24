@@ -25,5 +25,7 @@ fi
 
 #запрошено 10 и более знаков - ищем среди пользователей по мобильнику
 if [ ${#num} -ge 10 ]; then
-	wget --timeout=1 --tries=1 http://$api/users/view?mobile=$num -O - -q | jq '.Ename' | xargs | head -c 30 | iconv -c
+	#заменяем пробелы (URLencode для бедных)
+	safenum=`echo $num| sed 's/\+/%2b/g'`
+	wget --timeout=1 --tries=1 http://$api/users/view?mobile=$safenum -O - -q | jq '.Ename' | xargs | head -c 30 | iconv -c
 fi
