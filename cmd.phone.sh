@@ -56,7 +56,7 @@ fi
 
 #пытаемся выяснить что за модель телефона:
 echo Supposing Cisco ...
-title=`curl -s http://$phone_addr/|grep -E '<title>SPA[0-9]+ Configuration Utility</title>'`
+title=`curl -s http://$phone_addr/|grep -E '<title>SPA[0-9]+G? Configuration Utility</title>'`
 if [ -n "$title" ]; then
 	echo Cisco SPA detected
 	model=CiscoSPA
@@ -101,7 +101,7 @@ case $1 in
 			http://$phone_addr/cgi-bin/api-sys_operation
 			;;
 		CiscoSPA)
-			curl "http://$phone_addr/admin/reboot"
+			curl --user admin:$password "http://$phone_addr/admin/reboot"
 			;;
 		esac
 		;;

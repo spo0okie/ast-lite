@@ -59,16 +59,21 @@ users_conf_ck(){
 	for sec in $sections; do
 		secret=null
 		username=null
+		host=null
 		ini_parser "$users_conf.bak" $sec
-		if [ "$secret" = "null" ] ; then
-			lmsg "$sec($callerid) - no passwd key exist! (adding)"
-			sed -i "/\[$sec\]/a\secret=" $users_conf
-		elif [ "$username" = "null" ] ; then
-			lmsg "$sec($callerid) - no username key exist! (adding)"
-			sed -i "/\[$sec\]/a\username=$sec" $users_conf
-		else
-			echo -n .
+		#если нет ограничения по хосту
+		if [ "$host" = "null" ] || [ "$host" = "dynamic" ]; then
+			#проверяем ограничения по паролю
+			if [ "$secret" = "null" ] ; then
+				lmsg "$sec($callerid) - no passwd key exist! (adding)"
+				sed -i "/\[$sec\]/a\secret=" $users_conf
+			fi
+			if [ "$username" = "null" ] ; then
+				lmsg "$sec($callerid) - no username key exist! (adding)"
+				sed -i "/\[$sec\]/a\username=$sec" $users_conf
+			fi
 		fi
+		echo -n .
 	done
 	echo
 	#проверяем что в файле нет пустых паролей
