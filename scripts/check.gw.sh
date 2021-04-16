@@ -15,6 +15,7 @@ natted_ext=`/usr/bin/wget -O - -q icanhazip.com|/bin/sed 's/ //g'`
 #сконфигурированный адрес
 config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | /bin/cut -d"=" -f2 |/bin/sed 's/ //g'`
 
+DATE=`/bin/date`
 
 
 if [ -z "$natted_ext" ]; then
@@ -46,6 +47,8 @@ if [ "$natted_ext" != "$config_ext" ]; then
 	/sbin/service asterisk start
 else
 	echo "Current configured: $config_ext;	natted: $natted_ext;	- All OK"
+	echo $DATE
+	echo "--------------------------------------------------------------------"
 fi
 
 set_error_flag 0

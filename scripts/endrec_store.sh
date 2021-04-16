@@ -21,6 +21,7 @@ if [ -r $mp3file ]; then
 	mp3dir=$recdir/$fdate
 	mkdir -p $mp3dir # no error on exist (-p)
 	if [ -d $mp3dir ]; then
+		chmod 777 $mp3dir
 		echo "$starttime moving mp3: $mp3dir" >>$reclog
 		mv $mp3file $mp3dir
 		echo "$starttime store done" >>$reclog

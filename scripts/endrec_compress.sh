@@ -74,6 +74,7 @@ fi
 if [ -r $mp3file ]; then
 	#mp3 есть - прибираемся
 	echo "$starttime mp3 ready: $mp3file" >>$reclog
+	chmod 666 $mp3file
 	echo "$starttime cleaning..." >>$reclog
 	rm -f $inrec
 	rm -f $outrec
