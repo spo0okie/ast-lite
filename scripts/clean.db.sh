@@ -1,0 +1,3 @@
+echo "delete from chan_events where UNIX_TIMESTAMP(created_at)<(UNIX_TIMESTAMP(NOW()) - 3*86400)" | mysql calls -u calls_user --password=Calls_01
+echo "delete from chans where UNIX_TIMESTAMP(created_at)<(UNIX_TIMESTAMP(NOW()) - 3*86400)" | mysql calls -u calls_user --password=Calls_01
+echo "delete from call_states where UNIX_TIMESTAMP(created_at)<(UNIX_TIMESTAMP(NOW()) - 180*86400)" | mysql calls -u calls_user --password=Calls_01
