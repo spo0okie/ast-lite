@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PWD=$(dirname $0)
 DIR="/home/record/org1/_current"

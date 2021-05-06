@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #скрипт проверки соответствия текущего внешнего адреса и настройки внешнего адреса в asterisk
 
 . /etc/asterisk/scripts/bash.lib.sh
@@ -9,11 +9,12 @@ logfile=/var/log/asterisk/ext_ip.log
 
 config=/etc/asterisk/sip_trunks.conf
 
+bincut=`which cut`
 #текущий внешний адрес 
 natted_ext=`/usr/bin/wget -O - -q icanhazip.com|/bin/sed 's/ //g'`
 
 #сконфигурированный адрес
-config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | /bin/cut -d"=" -f2 |/bin/sed 's/ //g'`
+config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | $bincut -d"=" -f2 |/bin/sed 's/ //g'`
 
 DATE=`/bin/date`
 
@@ -42,9 +43,8 @@ if [ "$natted_ext" != "$config_ext" ]; then
 	#подменяем сам конфиг
 	mv $config.new__ $config
 	#перепускаем сервис
-	/sbin/service asterisk stop
-	/sbin/service network restart
-	/sbin/service asterisk start
+	/sbin/asterisk -rx'sip reload'
+	modprobe ip_conntrack
 else
 	echo "Current configured: $config_ext;	natted: $natted_ext;	- All OK"
 	echo $DATE

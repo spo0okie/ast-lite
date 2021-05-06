@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [ -z "$1" ]; then
 	echo "Usage: $0 <org_name> [days=180] [action=echo]"
 	exit

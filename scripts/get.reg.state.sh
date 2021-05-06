@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 if [ -z "$1" ]; then 
 	echo "error"
 	exit 10

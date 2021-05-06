@@ -10,6 +10,7 @@ delay=$3
 if [ -n "$delay" ]; then
 	sleep $delay
 fi
+mkdir -p /tmp/ast_callfiles
 
 echo "Channel: Local/$from@org1_phones" > $fname
 echo "Callerid: Вызов $to<$from>" >> $fname

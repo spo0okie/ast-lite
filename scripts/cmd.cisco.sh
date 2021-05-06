@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ -z "$2" ]; then
 	echo "usage: $0 <cmd> <phone_num>"

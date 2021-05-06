@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #скрипт отправки записи на почту
 #
 usage="Usage: $0 <muttrc> <to_addr> <subject> <message>"

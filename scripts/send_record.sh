@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #скрипт отправки записи на почту
 #
 usage="Usage: $0 <file> <muttrc> <to_addr> <subject> <message>"
@@ -22,7 +22,7 @@ fi
 
 #если есть MP3 то отправляем его
 if [ -r "$input.mp3" ]; then
-	echo -e $message | /usr/bin/mutt -F $muttrc -a "$input.mp3" -s "$subject" -- $to
+	echo -e $message | /usr/bin/mutt -d9 -F $muttrc -a "$input.mp3" -s "$subject" -- $to
 else
 	echo "$input.mp3 not found"
 fi

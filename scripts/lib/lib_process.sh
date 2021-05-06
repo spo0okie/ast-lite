@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 lib_process_version="2.0rc"
 
 #hist:

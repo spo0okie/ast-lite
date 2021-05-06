@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 lib_aster_version="0.1 alpha"
 #библиотека для скриптов астериска на шелле
 

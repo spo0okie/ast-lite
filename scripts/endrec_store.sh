@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #скрипт хранения mp3 в папочках с датами
 
 starttime=`date`
