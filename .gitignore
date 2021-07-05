@@ -20,7 +20,7 @@ exten.priv.*
 !exten.priv.org1.conf.sample
 #
 #персональный файл провижнинга (переменные хоста)
-phoneprov.priv.conf
+phoneprov.priv.*
 #настройка кластера серверов везде своя
 cluster.*
 #
