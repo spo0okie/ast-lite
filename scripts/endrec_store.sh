@@ -23,7 +23,7 @@ if [ -r $mp3file ]; then
 	if [ -d $mp3dir ]; then
 		chmod 777 $mp3dir
 		echo "$starttime moving mp3: $mp3dir" >>$reclog
-		mv $mp3file $mp3dir
+		mv "$mp3file" "$mp3dir"
 		echo "$starttime store done" >>$reclog
 	else
 		echo "$starttime: not found dir: $mp3dir" >>$reclog

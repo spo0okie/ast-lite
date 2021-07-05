@@ -76,9 +76,9 @@ if [ -r $mp3file ]; then
 	echo "$starttime mp3 ready: $mp3file" >>$reclog
 	chmod 666 $mp3file
 	echo "$starttime cleaning..." >>$reclog
-	rm -f $inrec
-	rm -f $outrec
-	rm -f $simplerec
+	rm -f "$inrec"
+	rm -f "$outrec"
+	rm -f "$simplerec"
 	echo "$starttime compress done" >>$reclog
 else
 	#нету mp3 - чтото пошло не так. выходим

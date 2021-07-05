@@ -14,3 +14,4 @@ if [ -n "$3" ]; then
 	cmd=$3
 fi
 find /home/record/$1 -type f -mtime +$i -exec $cmd -f {} \;
+/etc/asterisk/scripts/clear.emptyrecorddirs.sh
