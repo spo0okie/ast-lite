@@ -41,3 +41,6 @@ exten.tpl.org*
 
 #файлы настройки почты уникальны
 muttrc*
+
+#custom yml dev
+site_accesses.sh
