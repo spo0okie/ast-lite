@@ -62,6 +62,13 @@ if [ -n "$title" ]; then
 	model=CiscoSPA
 fi
 
+echo Supposing Yealink ...
+title=`curl -s "http://$phone_addr/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status"|grep -E '<title>Yealink T[0-9]+P Phone</title>'`
+if [ -n "$title" ]; then
+	echo Yealink detected
+	model=Yealink
+fi
+
 if [ -z "$model" ]; then
 	echo Supposing Grandstream ...
 	title=`curl -s http://$phone_addr/json/configs/model.define.js|grep '"model":'`
@@ -102,6 +109,10 @@ case $1 in
 			;;
 		CiscoSPA)
 			curl --user admin:$password "http://$phone_addr/admin/reboot"
+			;;
+
+		Yealink)
+			curl --user admin:$password "http://$phone_addr/servlet?key=Reboot"
 			;;
 		esac
 		;;
