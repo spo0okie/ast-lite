@@ -57,6 +57,13 @@ users_conf_ck(){
 	#выдергиваем все имена незакомментированных секций, кроме тех, что с (!) - шаблоны т.е.
 	#sections=`ini_section_list $users_conf` - не годится, т.к. надо исключать шаблоны
 	sections=`cat $users_conf | grep -v '^;' | egrep '^\[\w+\]' | egrep -v '^\[\w+\]\(!\)' | sed -E 's/\[(\w+)\](\(.*\))?/\1/'`
+	dupes=`echo $sections | sed 's/\s\+/\n/g' | sort | uniq -c | grep -v '^\s*1' | sed 's/^\s\+[0-9]\+\s\+//g'`
+	if [ -n "$dupes" ]; then
+		echo "err"
+		echo "DUPES:"
+		echo $dupes
+		halt "remove dupes first!"
+	fi
 	for sec in $sections; do
 		secret=null
 		username=null

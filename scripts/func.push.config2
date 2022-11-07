@@ -8,7 +8,7 @@ logfile=/var/log/asterisk/cluster/push.$1.log
 
 lmsg "Config push started."
 
-dbtrees="CallerID CallLimit Dubler DubSched DubDelay Svc"
+dbtrees="CallerID CallLimit Dubler DubSched DubDelay Svc Blacklist"
 
 #подключаем конфиг
 ini_section_load '/etc/asterisk/cluster.ini' global
