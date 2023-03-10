@@ -22,7 +22,7 @@ if [ "$2" == "all" ]; then
 		echo "$i ..."
 		sleep 1
 	done
-	asterisk -rx "module reload"
+	asterisk -rx "sip reload"
 	for i in $list; do
 		$0 $1 $i bulk
 	done
