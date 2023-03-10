@@ -6,7 +6,7 @@ now=`date`
 log=/var/log/asterisk/bitrix/$1.log
 
 if [ "$1" == "register" ]; then
-	usage="$0 register org1 callerId direction external_phone bitrix_user_id"
+	usage="$0 register org1 callerId direction external_phone bitrix_user_id [recordfile]"
 	if [ -z $6 ]; then
 		echo "usage: $usage"
 		exit 10
@@ -38,8 +38,12 @@ if [ "$1" == "register" ]; then
 	CRM_CREATE=1
 	json="{\"TYPE\":$TYPE,\"USER_PHONE_INNER\":"$USER_PHONE_INNER",\"USER_ID\":$USER_ID,\"PHONE_NUMBER\":"$PHONE_NUMBER",\"CRM_CREATE\":$CRM_CREATE}"
 	echo "$now > $json" >> $log
-	callID=`curl -s -X POST -H "Content-Type: application/json" -d $json https://goya-consult.bitrix24.ru/rest/48/n7cvn56ukyg64ei0/telephony.externalcall.register.json | jq -r .result.CALL_ID |sed 's/\n//'`
+	callID=`curl -s -X POST -H "Content-Type: application/json" -d $json https://goya-consult.bitrix24.ru/rest/48/y3zrfjwi35bgb5we/telephony.externalcall.register.json | jq -r .result.CALL_ID |sed 's/\n//'`
 	echo "$now < $callID" >> $log
+
+	if [ -n "$7" ]; then
+		echo -e "USER_ID:$USER_ID\nCALL_ID:$callID" > $7.btx
+	fi
 	echo -n $callID
 fi
 
@@ -47,10 +51,19 @@ fi
 if [ "$1" == "finish" ]; then
 
 	usage="$0 attachRecord recordfile callId userId"
-	if [ -z $4 ]; then
-		echo "usage: $usage"
-		exit 10
+
+	if [ -f "$2.btx" ]; then
+		CALL_ID=`grep CALL_ID "$2.btx"|cut -d':' -f2`
+		USER_ID=`grep USER_ID "$2.btx"|cut -d':' -f2`
+	else
+		if [ -z $4 ]; then
+			echo "usage: $usage"
+			exit 10
+		fi
+		CALL_ID=$3
+		USER_ID=$4
 	fi
+
 
 	#дата для папки выкусывается из имени файла. т.е. если файл не по формату, то хрен он нормально сложится в папочку
 	fdate=`echo $2|rev|cut -d/ -f1|rev|cut -d- -f1`
@@ -66,14 +79,17 @@ if [ "$1" == "finish" ]; then
 	mp3dir=$recdir/$fdate
 	mp3file=$mp3dir/$mp3name
 	mp3duration=$(mp3info -p "%S\n" $mp3file)
-	if [ -r $mp3file ]; then
-		echo "$now attaching mp3: $mp3file to $3" >>$log
-		(echo "{\"CALL_ID\":\"$3\",\"USER_ID\":\"$4\",\"DURATION\":$mp3duration}") | \
-		curl -s -X POST -H "Content-Type: application/json" -d @- https://goya-consult.bitrix24.ru/rest/48/n7cvn56ukyg64ei0/telephony.externalcall.finish.json --verbose
 
-		(echo "{\"CALL_ID\":\"$3\",\"FILENAME\":\"$mp3name\",\"FILE_CONTENT\":\""; base64 $mp3file; echo '"}') | \
-		curl -s -X POST -H "Content-Type: application/json" -d @- https://goya-consult.bitrix24.ru/rest/48/n7cvn56ukyg64ei0/telephony.externalcall.attachRecord.json --verbose
+
+
+	if [ -r $mp3file ]; then
+		echo "$now attaching mp3: $mp3file to $CALL_ID" >>$log
+		(echo "{\"CALL_ID\":\"$CALL_ID\",\"USER_ID\":\"$USER_ID\",\"DURATION\":$mp3duration}") | \
+		curl -s -X POST -H "Content-Type: application/json" -d @- https://goya-consult.bitrix24.ru/rest/48/y3zrfjwi35bgb5we/telephony.externalcall.finish.json --verbose
+
+		(echo "{\"CALL_ID\":\"$CALL_ID\",\"FILENAME\":\"$mp3name\",\"FILE_CONTENT\":\""; base64 $mp3file; echo '"}') | \
+		curl -s -X POST -H "Content-Type: application/json" -d @- https://goya-consult.bitrix24.ru/rest/48/y3zrfjwi35bgb5we/telephony.externalcall.attachRecord.json --verbose
 	else
-		echo "$now not found mp3: $mp3file for $3" >>$log
+		echo "$now not found mp3: $mp3file for $CALL_ID" >>$log
 	fi
 fi
