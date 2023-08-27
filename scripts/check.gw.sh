@@ -1,54 +1,60 @@
 #!/bin/bash
 #скрипт проверки соответствия текущего внешнего адреса и настройки внешнего адреса в asterisk
+PROGPATH=/etc/asterisk/scripts
 
-. /etc/asterisk/scripts/bash.lib.sh
+. $PROGPATH/lib/lib_core.sh
+
 
 #файл лога
-statusfile=/var/log/asterisk/ext_ip
 logfile=/var/log/asterisk/ext_ip.log
-
+#файл статуса
+statusfile=/var/log/asterisk/ext_ip
+#конфиг
 config=/etc/asterisk/sip_trunks.conf
 
-bincut=`which cut`
-#текущий внешний адрес 
-natted_ext=`/usr/bin/wget -O - -q icanhazip.com|/bin/sed 's/ //g'`
+lmsg "Script started -----"
+msgGetExt="Getting external IP"
+natted_ext=`/usr/bin/wget --no-proxy -O - -q icanhazip.com|/bin/sed 's/ //g'`
 
+if ! ( echo $natted_ext | grep '^\([0-9]\{1,3\}\.\?\)\{4\}$' > /dev/null ); then
+	set_error_flag 1
+	lmsg_err "$msgGetExt" ERR
+	halt "Can't detect natted address"
+else
+	lmsg_ok "$msgGetExt" "$natted_ext"
+fi
+
+
+msgGetCfg="Getting configured IP"
 #сконфигурированный адрес
-config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | $bincut -d"=" -f2 |/bin/sed 's/ //g'`
+config_ext=`/bin/cat $config | /bin/grep -v -E " *;" | /bin/grep externip= | cut -d"=" -f2 |/bin/sed 's/ //g'`
 
-DATE=`/bin/date`
-
-
-if [ -z "$natted_ext" ]; then
+if ! ( echo $config_ext | grep '^\([0-9]\{1,3\}\.\?\)\{4\}$' > /dev/null ); then
 	set_error_flag 1
-	stop "ERROR: Can't detect natted address"
+	lmsg_err "$msgGetCfg" ERR
+	halt "Can't detect configured address"
+else
+	lmsg_ok "$msgGetCfg" "$config_ext"
 fi
 
-#проверка синтаксиса возвращенного адреса
-if ! ( echo $natted_ext | grep '^\([0-9]\{1,3\}\.\?\)\{4\}$' ); then
-	set_error_flag 1
-	stop "ERROR: Can't detect natted address"
-fi
-
-if [ -z "$config_ext" ]; then
-	set_error_flag 1
-	stop "ERROR: Can't detect configured address"
-fi
 
 if [ "$natted_ext" != "$config_ext" ]; then
 	#если адреса разъехались
-	log "Current configured IP: $config_ext != natted: $natted_ext;	- Reconfig now"
+	lmsg_err "Current configured IP: $config_ext != natted: $natted_ext" "Reconfig now"
 	#делаем из старого конфиге новый, в котором подменяем внешний адрес на обнаруженный
 	/bin/cat $config | /bin/sed "s/externip=$config_ext/externip=$natted_ext/" > $config.new__
 	#подменяем сам конфиг
-	mv $config.new__ $config
-	#перепускаем сервис
-	/sbin/asterisk -rx'sip reload'
-	modprobe ip_conntrack
+	if [ -s $config.new__ ]; then
+		mv $config.new__ $config
+		#перепускаем сервис
+		/sbin/asterisk -rx'sip reload'
+		modprobe ip_conntrack
+	else
+		set_error_flag 1
+		halt "genered config file is zero-sized"
+	fi
 else
-	echo "Current configured: $config_ext;	natted: $natted_ext;	- All OK"
-	echo $DATE
-	echo "--------------------------------------------------------------------"
+	lmsg_ok "Current configured: $config_ext == natted: $natted_ext" "All OK"
 fi
 
 set_error_flag 0

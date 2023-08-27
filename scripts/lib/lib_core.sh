@@ -266,4 +266,19 @@ if [ "$CON_silent" != "1" ]; then
 	echo "Core" v$lib_core_version
 fi
 
+
+#выставляет флаг ошибки работы скрипта
+set_error_flag() {
+    if [ -n "$statusfile" ]; then
+        echo $1 > $statusfile.err
+    fi
+}
+
+#выставляет флаг в файл статуса
+set_status_flag() {
+    if [ -n "$statusfile" ]; then
+        echo $1 > $statusfile
+    fi
+}
+
 lib_load lib_con

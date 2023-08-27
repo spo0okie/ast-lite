@@ -63,7 +63,7 @@ if [ -n "$title" ]; then
 fi
 
 echo Supposing Yealink ...
-title=`curl -s "http://$phone_addr/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status"|grep -E '<title>Yealink T[0-9]+P Phone</title>'`
+title=`curl -s --insecure "https://$phone_addr/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status"|grep -E '<title>Yealink T[0-9]+(P|G)? Phone</title>'`
 if [ -n "$title" ]; then
 	echo Yealink detected
 	model=Yealink
@@ -112,7 +112,7 @@ case $1 in
 			;;
 
 		Yealink)
-			curl --user admin:$password "http://$phone_addr/servlet?key=Reboot"
+			curl --insecure --user admin:$password "https://$phone_addr/servlet?key=Reboot"
 			;;
 		esac
 		;;
